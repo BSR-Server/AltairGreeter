@@ -9,7 +9,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 @Plugin(
         id = "bsrgreeter",
         name = "BSR Greeter",
-        version = "1.0.0",
+        version = "1.0.1",
         url = "https://www.bsrserver.org:8443",
         description = "A greeter",
         authors = {"Andy Zhang"}

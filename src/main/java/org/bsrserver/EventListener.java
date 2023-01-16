@@ -87,16 +87,18 @@ public class EventListener {
 
     @Subscribe
     public void onServerConnectedEvent(ServerConnectedEvent event) {
-        Component message = Component.text("-".repeat(40) + "\n")
-                .append(Component.text("§e§l" + event.getPlayer().getUsername()))
-                .append(Component.text("§r, 欢迎回到 §bBSR 服务器§r！\n"))
-                .append(Component.text("这是 BSR 服务器开服的第 " + getOpenDays() + " 天\n\n"))
-                .append(Component.text("[§a一言§r] " + getSentence() + "\n\n"))
-                .append(getServerList(event.getServer()))
-                .append(Component.text("\n"))
-                .append(Component.text("-".repeat(40)));
+        new Thread(() -> {
+            Component message = Component.text("-".repeat(40) + "\n")
+                    .append(Component.text("§e§l" + event.getPlayer().getUsername()))
+                    .append(Component.text("§r, 欢迎回到 §bBSR 服务器§r！\n"))
+                    .append(Component.text("这是 BSR 服务器开服的第 " + getOpenDays() + " 天\n\n"))
+                    .append(Component.text("[§a一言§r] " + getSentence() + "\n\n"))
+                    .append(getServerList(event.getServer()))
+                    .append(Component.text("\n"))
+                    .append(Component.text("-".repeat(40)));
 
-        // send to player
-        event.getPlayer().sendMessage(message);
+            // send to player
+            event.getPlayer().sendMessage(message);
+        }).start();
     }
 }

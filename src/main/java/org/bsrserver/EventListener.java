@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import com.velocitypowered.api.event.Subscribe;
@@ -20,10 +21,19 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class EventListener {
-    ProxyServer proxyServer;
+    private final ProxyServer proxyServer;
+    private final HashMap<String, ServerInfo> serverInfoHashMap;
 
-    private int getOpenDays() {
-        return (int) ChronoUnit.DAYS.between(LocalDate.of(2021, 1, 10), LocalDate.now());
+    private String getOpenDays(RegisteredServer server) {
+        String serverName = server.getServerInfo().getName();
+        ServerInfo serverInfo = serverInfoHashMap.get(serverName);
+        String namedName = serverName;
+        int daysBetween = 0;
+        if (serverInfo != null) {
+            namedName = serverInfo.namedName() != null ? serverInfo.namedName() : namedName;
+            daysBetween = (int) ChronoUnit.DAYS.between(serverInfo.foundationTime().toLocalDate(), LocalDate.now());
+        }
+        return "这是 " + namedName + " 开服的第 " + daysBetween + " 天\n\n";
     }
 
     private String getSentence() {
@@ -81,8 +91,9 @@ public class EventListener {
         return Component.join(JoinConfiguration.separator(Component.text(" ")), components);
     }
 
-    public EventListener(ProxyServer proxyServer) {
-        this.proxyServer = proxyServer;
+    public EventListener(Main main) {
+        this.proxyServer = main.getProxyServer();
+        this.serverInfoHashMap = main.getServerInfoHashMap();
     }
 
     @Subscribe
@@ -91,7 +102,7 @@ public class EventListener {
             Component message = Component.text("-".repeat(40) + "\n")
                     .append(Component.text("§e§l" + event.getPlayer().getUsername()))
                     .append(Component.text("§r, 欢迎回到 §bBSR 服务器§r！\n"))
-                    .append(Component.text("这是 BSR 服务器开服的第 " + getOpenDays() + " 天\n\n"))
+                    .append(Component.text(getOpenDays(event.getServer())))
                     .append(Component.text("[§a一言§r] " + getSentence() + "\n\n"))
                     .append(getServerList(event.getServer()))
                     .append(Component.text("\n"))

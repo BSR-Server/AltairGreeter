@@ -47,7 +47,7 @@ public class Sentences {
             }
 
             // logging
-            logger.info("Fetch sentences: " + sentences);
+            logger.info("Fetched sentences: " + sentences);
         } catch (Exception exception) {
             exception.printStackTrace();
         }

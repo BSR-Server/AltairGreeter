@@ -58,7 +58,7 @@ public class Main {
                 ServerInfo serverInfo = new ServerInfo(
                         serverName,
                         resultSet.getString("named_name"),
-                        resultSet.getDate("foundation_time")
+                        resultSet.getDate("foundation_time").toLocalDate()
                 );
                 serverInfoHashMap.put(serverName, serverInfo);
             }

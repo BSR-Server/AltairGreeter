@@ -1,11 +1,11 @@
 package org.bsrserver;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 public record ServerInfo(
         String serverName,
         String namedName,
-        Date foundationTime
+        LocalDate foundationTime
 ) {
     @Override
     public String toString() {

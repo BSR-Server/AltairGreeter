@@ -6,6 +6,7 @@ import java.net.URL;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Optional;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import com.velocitypowered.api.event.Subscribe;
@@ -24,16 +25,42 @@ public class EventListener {
     private final ProxyServer proxyServer;
     private final HashMap<String, ServerInfo> serverInfoHashMap;
 
+    public EventListener(Main main) {
+        this.proxyServer = main.getProxyServer();
+        this.serverInfoHashMap = main.getServerInfoHashMap();
+    }
+
+    private Optional<ServerInfo> getServerInfo(String serverName) {
+        return Optional.ofNullable(serverInfoHashMap.get(serverName));
+    }
+
+    private String getServerInfoNamedName(ServerInfo serverInfo) {
+        String namedName = serverInfo.namedName();
+        return namedName != null ? namedName : serverInfo.serverName();
+    }
+
+    private String getServerInfoNamedName(String serverName) {
+        Optional<ServerInfo> serverInfo = getServerInfo(serverName);
+        if (serverInfo.isPresent()) {
+            return getServerInfoNamedName(serverInfo.get());
+        } else {
+            return serverName;
+        }
+    }
+
+    private LocalDate getServerInfoFoundationTime(String serverName) {
+        Optional<ServerInfo> serverInfo = getServerInfo(serverName);
+        if (serverInfo.isPresent()) {
+            return serverInfo.get().foundationTime();
+        } else {
+            return LocalDate.now();
+        }
+    }
+
     private String getOpenDays(RegisteredServer server) {
         String serverName = server.getServerInfo().getName();
-        ServerInfo serverInfo = serverInfoHashMap.get(serverName);
-        String namedName = serverName;
-        int daysBetween = 0;
-        if (serverInfo != null) {
-            namedName = serverInfo.namedName() != null ? serverInfo.namedName() : namedName;
-            daysBetween = (int) ChronoUnit.DAYS.between(serverInfo.foundationTime().toLocalDate(), LocalDate.now());
-        }
-        return "这是 " + namedName + " 开服的第 " + daysBetween + " 天\n\n";
+        int daysBetween = (int) ChronoUnit.DAYS.between(getServerInfoFoundationTime(serverName), LocalDate.now());
+        return "这是 " + getServerInfoNamedName(serverName) + " 开服的第 " + daysBetween + " 天\n\n";
     }
 
     private String getSentence() {
@@ -78,22 +105,17 @@ public class EventListener {
 
             // this server or other server
             if (serverName.equals(server.getServerInfo().getName())) {
-                serverNameComponent = Component.text("[§l" + serverName + "§r]")
+                serverNameComponent = Component.text("[§l" + getServerInfoNamedName(serverName) + "§r]")
                         .hoverEvent(HoverEvent.showText(Component.text("当前服务器")));
             } else {
-                serverNameComponent = Component.text("[§a" + serverName + "§r]")
+                serverNameComponent = Component.text("[§a" + getServerInfoNamedName(serverName) + "§r]")
                         .clickEvent(ClickEvent.runCommand("/server " + serverName))
-                        .hoverEvent(HoverEvent.showText(Component.text("点击加入服务器 §b" + serverName)));
+                        .hoverEvent(HoverEvent.showText(Component.text("点击加入服务器 §b" + getServerInfoNamedName(serverName))));
             }
             components.add(serverNameComponent);
         }
 
         return Component.join(JoinConfiguration.separator(Component.text(" ")), components);
-    }
-
-    public EventListener(Main main) {
-        this.proxyServer = main.getProxyServer();
-        this.serverInfoHashMap = main.getServerInfoHashMap();
     }
 
     @Subscribe

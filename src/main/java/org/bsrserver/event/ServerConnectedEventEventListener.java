@@ -1,10 +1,8 @@
 package org.bsrserver.event;
 
+import java.util.*;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Optional;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -18,6 +16,7 @@ import net.kyori.adventure.text.event.HoverEvent;
 import org.bsrserver.Main;
 import org.bsrserver.components.Sentences;
 import org.bsrserver.components.ServerInfo;
+import org.bsrserver.components.ServerListServerComponent;
 
 public class ServerConnectedEventEventListener {
     private final ProxyServer proxyServer;
@@ -64,7 +63,7 @@ public class ServerConnectedEventEventListener {
     }
 
     private Component getServerList(RegisteredServer server) {
-        ArrayList<Component> components = new ArrayList<>();
+        ArrayList<ServerListServerComponent> serverArrayList = new ArrayList<>();
 
         // for each server
         for (RegisteredServer registeredServer : proxyServer.getAllServers()) {
@@ -80,10 +79,20 @@ public class ServerConnectedEventEventListener {
                         .clickEvent(ClickEvent.runCommand("/server " + serverName))
                         .hoverEvent(HoverEvent.showText(Component.text("点击加入服务器 §b" + getServerInfoNamedName(serverName))));
             }
-            components.add(serverNameComponent);
+
+            // save to list
+            Optional<ServerInfo> serverInfo = getServerInfo(serverName);
+            int priority = serverInfo.map(ServerInfo::priority).orElse(-1);
+            serverArrayList.add(new ServerListServerComponent(priority, serverNameComponent));
         }
 
-        return Component.join(JoinConfiguration.separator(Component.text(" ")), components);
+        // sort array and return joined component
+        Collections.sort(serverArrayList);
+        Collections.reverse(serverArrayList);
+        return Component.join(
+                JoinConfiguration.separator(Component.text(" ")),
+                serverArrayList.stream().map(ServerListServerComponent::getComponent).toList()
+        );
     }
 
     @Subscribe

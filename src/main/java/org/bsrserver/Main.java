@@ -70,7 +70,8 @@ public class Main {
                 ServerInfo serverInfo = new ServerInfo(
                         serverName,
                         resultSet.getString("named_name"),
-                        resultSet.getDate("foundation_time").toLocalDate()
+                        resultSet.getDate("foundation_time").toLocalDate(),
+                        resultSet.getInt("priority")
                 );
                 serverInfoHashMap.put(serverName, serverInfo);
             }

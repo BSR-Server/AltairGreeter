@@ -20,7 +20,7 @@ import org.bsrserver.event.ServerConnectedEventEventListener;
 @Plugin(
         id = "bsrgreeter",
         name = "BSR Greeter",
-        version = "1.2.0",
+        version = "1.3.0",
         url = "https://www.bsrserver.org:8443",
         description = "A greeter",
         authors = {"Andy Zhang"}

@@ -13,6 +13,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 
 import org.bsrserver.config.Config;
+import org.bsrserver.components.Sentences;
 import org.bsrserver.components.ServerInfo;
 import org.bsrserver.event.ServerConnectedEventEventListener;
 
@@ -27,24 +28,24 @@ import org.bsrserver.event.ServerConnectedEventEventListener;
 public class Main {
     private final ProxyServer proxyServer;
     private final Logger logger;
-    private final Path dataDirectory;
     private final HashMap<String, ServerInfo> serverInfoHashMap = new HashMap<>();
+    private final Sentences sentences;
 
     @Inject
     public Main(ProxyServer proxyServer, Logger logger, @DataDirectory Path dataDirectory) {
         this.proxyServer = proxyServer;
         this.logger = logger;
-        this.dataDirectory = dataDirectory;
+
+        // load config
+        Config.getInstance().loadConfig(dataDirectory);
+
+        // init data
+        new Thread(this::loadDatabase).start();
+        this.sentences = new Sentences(logger);
     }
 
     @Subscribe
     public void onInitialize(ProxyInitializeEvent event) {
-        // load config
-        Config.getInstance().loadConfig(dataDirectory);
-
-        // load database
-        this.loadDatabase();
-
         // register command
         proxyServer.getEventManager().register(this, new ServerConnectedEventEventListener(this));
     }
@@ -89,5 +90,9 @@ public class Main {
 
     public HashMap<String, ServerInfo> getServerInfoHashMap() {
         return serverInfoHashMap;
+    }
+
+    public Sentences getSentences() {
+        return sentences;
     }
 }

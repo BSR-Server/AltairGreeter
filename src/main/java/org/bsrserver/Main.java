@@ -38,7 +38,14 @@ public class Main {
         // load config
         Config.getInstance().loadConfig(dataDirectory);
 
-        // read database
+        // load database
+        this.loadDatabase();
+
+        // register command
+        proxyServer.getEventManager().register(this, new EventListener(this));
+    }
+
+    private void loadDatabase() {
         try {
             // connect
             Class.forName("org.postgresql.Driver");
@@ -70,9 +77,6 @@ public class Main {
             e.printStackTrace();
             logger.error("Fail connect to database");
         }
-
-        // register command
-        proxyServer.getEventManager().register(this, new EventListener(this));
     }
 
     public ProxyServer getProxyServer() {

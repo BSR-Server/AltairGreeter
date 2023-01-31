@@ -1,4 +1,4 @@
-package org.bsrserver;
+package org.bsrserver.components;
 
 import java.time.LocalDate;
 

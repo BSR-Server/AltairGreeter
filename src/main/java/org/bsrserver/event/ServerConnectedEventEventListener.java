@@ -1,4 +1,4 @@
-package org.bsrserver;
+package org.bsrserver.event;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -21,11 +21,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class EventListener {
+import org.bsrserver.Main;
+import org.bsrserver.components.ServerInfo;
+
+public class ServerConnectedEventEventListener {
     private final ProxyServer proxyServer;
     private final HashMap<String, ServerInfo> serverInfoHashMap;
 
-    public EventListener(Main main) {
+    public ServerConnectedEventEventListener(Main main) {
         this.proxyServer = main.getProxyServer();
         this.serverInfoHashMap = main.getServerInfoHashMap();
     }

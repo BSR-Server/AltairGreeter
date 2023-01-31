@@ -1,4 +1,4 @@
-package org.bsrserver;
+package org.bsrserver.config;
 
 import java.io.File;
 import java.io.IOException;

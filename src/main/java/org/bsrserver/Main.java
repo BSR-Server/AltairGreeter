@@ -12,6 +12,10 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 
+import org.bsrserver.config.Config;
+import org.bsrserver.components.ServerInfo;
+import org.bsrserver.event.ServerConnectedEventEventListener;
+
 @Plugin(
         id = "bsrgreeter",
         name = "BSR Greeter",
@@ -42,7 +46,7 @@ public class Main {
         this.loadDatabase();
 
         // register command
-        proxyServer.getEventManager().register(this, new EventListener(this));
+        proxyServer.getEventManager().register(this, new ServerConnectedEventEventListener(this));
     }
 
     private void loadDatabase() {

@@ -11,14 +11,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import org.slf4j.Logger;
-
 public class Sentences {
-    private final Logger logger;
     private final ArrayList<String> sentences = new ArrayList<>();
 
-    public Sentences(Logger logger) {
-        this.logger = logger;
+    public Sentences() {
         Executors.newScheduledThreadPool(1).scheduleAtFixedRate(this::updateSentences, 0, 5, TimeUnit.MINUTES);
     }
 
@@ -45,9 +41,6 @@ public class Sentences {
                     sentences.add(text);
                 }
             }
-
-            // logging
-            logger.info("Fetched sentences: " + sentences);
         } catch (Exception exception) {
             exception.printStackTrace();
         }

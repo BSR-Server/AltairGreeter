@@ -41,7 +41,7 @@ public class Main {
 
         // init data
         new Thread(this::loadDatabase).start();
-        this.sentences = new Sentences(logger);
+        this.sentences = new Sentences();
     }
 
     @Subscribe

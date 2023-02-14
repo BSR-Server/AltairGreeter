@@ -51,38 +51,37 @@ public class Main {
     }
 
     private void loadDatabase() {
-        try {
-            // connect
-            Class.forName("org.postgresql.Driver");
-            Connection connection = DriverManager.getConnection(
-                    Config.getInstance().getDatabaseUrl(),
-                    Config.getInstance().getDatabaseUser(),
-                    Config.getInstance().getDatabasePassword()
-            );
-            logger.info("Successfully connected to database");
+        boolean loadDatabase = false;
+        do {
+            try {
+                // connect
+                Class.forName("org.postgresql.Driver");
+                Connection connection = DriverManager.getConnection(Config.getInstance().getDatabaseUrl(), Config.getInstance().getDatabaseUser(), Config.getInstance().getDatabasePassword());
+                logger.info("Successfully connected to database");
 
-            // select
-            String tableName = Config.getInstance().getDatabaseTable();
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName);
-            while (resultSet.next()) {
-                String serverName = resultSet.getString("server_name");
-                ServerInfo serverInfo = new ServerInfo(
-                        serverName,
-                        resultSet.getString("named_name"),
-                        resultSet.getDate("foundation_time").toLocalDate(),
-                        resultSet.getInt("priority")
-                );
-                serverInfoHashMap.put(serverName, serverInfo);
+                // select
+                String tableName = Config.getInstance().getDatabaseTable();
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName);
+                while (resultSet.next()) {
+                    String serverName = resultSet.getString("server_name");
+                    ServerInfo serverInfo = new ServerInfo(serverName, resultSet.getString("named_name"), resultSet.getDate("foundation_time").toLocalDate(), resultSet.getInt("priority"));
+                    serverInfoHashMap.put(serverName, serverInfo);
+                }
+                resultSet.close();
+                statement.close();
+                connection.close();
+                loadDatabase = true;
+                logger.info("Loaded servers: " + serverInfoHashMap.keySet());
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.error("Fail connect to database, retry in 10 seconds...");
+                try {
+                    Thread.sleep(100000);
+                } catch (Exception ignored) {
+                }
             }
-            resultSet.close();
-            statement.close();
-            connection.close();
-            logger.info("Loaded servers: " + serverInfoHashMap.keySet());
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.error("Fail connect to database");
-        }
+        } while (!loadDatabase);
     }
 
     public ProxyServer getProxyServer() {

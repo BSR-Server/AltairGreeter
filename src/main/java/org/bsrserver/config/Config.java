@@ -53,4 +53,8 @@ public class Config {
     public String getDatabaseTable() {
         return configToml.getString("database.table");
     }
+
+    public String getSentencesUrl() {
+        return configToml.getString("sentences.url");
+    }
 }

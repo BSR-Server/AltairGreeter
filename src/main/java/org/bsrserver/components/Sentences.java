@@ -10,6 +10,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.bsrserver.config.Config;
 
 public class Sentences {
     private final ArrayList<String> sentences = new ArrayList<>();
@@ -22,7 +23,7 @@ public class Sentences {
         sentences.clear();
         try {
             // request
-            URL url = new URL("https://www.bsrserver.org:8443/static?prefix=pages/gifs/");
+            URL url = new URL(Config.getInstance().getSentencesUrl());
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(connection.getInputStream());

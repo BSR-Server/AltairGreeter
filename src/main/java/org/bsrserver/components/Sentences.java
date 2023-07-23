@@ -1,7 +1,8 @@
 package org.bsrserver.components;
 
-import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.HttpURLConnection;
+import javax.net.ssl.HttpsURLConnection;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -24,6 +25,7 @@ public class Sentences {
         try {
             // request
             URL url = new URL(Config.getInstance().getSentencesUrl());
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(connection.getInputStream());

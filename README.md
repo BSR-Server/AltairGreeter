@@ -1,4 +1,4 @@
-# BSR Greeter
+# Altair Greeter
 
 > 欢迎插件
 

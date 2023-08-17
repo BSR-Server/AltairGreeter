@@ -18,9 +18,9 @@ import org.bsrserver.components.ServerInfo;
 import org.bsrserver.event.ServerConnectedEventEventListener;
 
 @Plugin(
-        id = "bsrgreeter",
-        name = "BSR Greeter",
-        version = "1.3.2",
+        id = "altairgreeter",
+        name = "Altair Greeter",
+        version = "1.4.0",
         url = "https://www.bsrserver.org:8443",
         description = "A greeter",
         authors = {"Andy Zhang"}

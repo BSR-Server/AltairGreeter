@@ -1,19 +1,19 @@
-package org.bsrserver.components;
+package org.bsrserver.data.servers;
 
 import java.time.LocalDate;
 
 public record ServerInfo(
         String serverName,
-        String namedName,
-        LocalDate foundationTime,
+        String givenName,
+        LocalDate foundationDate,
         int priority
 ) {
     @Override
     public String toString() {
         return "ServerInfo{" +
                 "serverName='" + serverName + '\'' +
-                ", namedName='" + namedName + '\'' +
-                ", foundationTime=" + foundationTime +
+                ", givenName='" + givenName + '\'' +
+                ", foundationDate=" + foundationDate +
                 ", priority=" + priority +
                 '}';
     }

@@ -4,105 +4,92 @@ import java.util.*;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
-import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
-import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
+import com.velocitypowered.api.event.player.ServerConnectedEvent;
 
-import org.bsrserver.Main;
-import org.bsrserver.components.Sentences;
-import org.bsrserver.components.ServerInfo;
+import org.bsrserver.AltairGreeter;
 import org.bsrserver.components.ServerListServerComponent;
+import org.bsrserver.data.servers.ServerInfo;
+import org.bsrserver.data.servers.ServersManager;
+import org.bsrserver.data.hitokoto.QuotationsManager;
 
 public class ServerConnectedEventEventListener {
     private final ProxyServer proxyServer;
-    private final HashMap<String, ServerInfo> serverInfoHashMap;
-    private final Sentences sentences;
+    private final QuotationsManager quotationsManager;
+    private final ServersManager serversManager;
 
-    public ServerConnectedEventEventListener(Main main) {
-        this.proxyServer = main.getProxyServer();
-        this.serverInfoHashMap = main.getServerInfoHashMap();
-        this.sentences = main.getSentences();
+    public ServerConnectedEventEventListener(AltairGreeter altairGreeter) {
+        this.proxyServer = altairGreeter.getProxyServer();
+        this.quotationsManager = altairGreeter.getQuotationsManager();
+        this.serversManager = altairGreeter.getServersManager();
     }
 
-    private Optional<ServerInfo> getServerInfo(String serverName) {
-        return Optional.ofNullable(serverInfoHashMap.get(serverName));
+    private ServerInfo getServerInfo(String serverName) {
+        return serversManager
+                .getServerInfo(serverName)
+                .orElseGet(() -> new ServerInfo(serverName, serverName, LocalDate.now(), Integer.MAX_VALUE));
     }
 
-    private String getServerInfoNamedName(ServerInfo serverInfo) {
-        String namedName = serverInfo.namedName();
-        return namedName != null ? namedName : serverInfo.serverName();
+    private String getOpenDays(ServerInfo serverInfo) {
+        int daysBetween = (int) ChronoUnit.DAYS.between(serverInfo.foundationDate(), LocalDate.now());
+        return "这是 " + serverInfo.givenName() + " 开服的第 " + daysBetween + " 天\n\n";
     }
 
-    private String getServerInfoNamedName(String serverName) {
-        Optional<ServerInfo> serverInfo = getServerInfo(serverName);
-        if (serverInfo.isPresent()) {
-            return getServerInfoNamedName(serverInfo.get());
+    private static Component getServerNameComponent(ServerInfo currentServerInfo, ServerInfo serverInfo) {
+        Component serverNameComponent;
+
+        // current server or other server
+        if (currentServerInfo.serverName().equals(serverInfo.serverName())) {
+            serverNameComponent = Component.text("[§l" + serverInfo.givenName() + "§r]")
+                    .hoverEvent(HoverEvent.showText(Component.text("当前服务器")));
         } else {
-            return serverName;
+            serverNameComponent = Component.text("[§a" + serverInfo.givenName() + "§r]")
+                    .clickEvent(ClickEvent.runCommand("/server " + serverInfo.serverName()))
+                    .hoverEvent(HoverEvent.showText(Component.text("点击加入服务器 §b" + serverInfo.givenName())));
         }
+
+        return serverNameComponent;
     }
 
-    private LocalDate getServerInfoFoundationTime(String serverName) {
-        Optional<ServerInfo> serverInfo = getServerInfo(serverName);
-        if (serverInfo.isPresent()) {
-            return serverInfo.get().foundationTime();
-        } else {
-            return LocalDate.now();
-        }
-    }
-
-    private String getOpenDays(RegisteredServer server) {
-        String serverName = server.getServerInfo().getName();
-        int daysBetween = (int) ChronoUnit.DAYS.between(getServerInfoFoundationTime(serverName), LocalDate.now());
-        return "这是 " + getServerInfoNamedName(serverName) + " 开服的第 " + daysBetween + " 天\n\n";
-    }
-
-    private Component getServerList(RegisteredServer server) {
+    private Component getServerListComponent(ServerInfo currentServerInfo) {
         ArrayList<ServerListServerComponent> serverArrayList = new ArrayList<>();
 
         // for each server
         for (RegisteredServer registeredServer : proxyServer.getAllServers()) {
-            String serverName = registeredServer.getServerInfo().getName();
-            Component serverNameComponent;
-
-            // this server or other server
-            if (serverName.equals(server.getServerInfo().getName())) {
-                serverNameComponent = Component.text("[§l" + getServerInfoNamedName(serverName) + "§r]")
-                        .hoverEvent(HoverEvent.showText(Component.text("当前服务器")));
-            } else {
-                serverNameComponent = Component.text("[§a" + getServerInfoNamedName(serverName) + "§r]")
-                        .clickEvent(ClickEvent.runCommand("/server " + serverName))
-                        .hoverEvent(HoverEvent.showText(Component.text("点击加入服务器 §b" + getServerInfoNamedName(serverName))));
-            }
+            ServerInfo serverInfo = getServerInfo(registeredServer.getServerInfo().getName());
+            Component serverNameComponent = getServerNameComponent(currentServerInfo, serverInfo);
 
             // save to list
-            Optional<ServerInfo> serverInfo = getServerInfo(serverName);
-            int priority = serverInfo.map(ServerInfo::priority).orElse(-1);
-            serverArrayList.add(new ServerListServerComponent(priority, serverNameComponent));
+            serverArrayList.add(new ServerListServerComponent(serverInfo.priority(), serverNameComponent));
         }
 
         // sort array and return joined component
-        Collections.sort(serverArrayList);
-        Collections.reverse(serverArrayList);
         return Component.join(
                 JoinConfiguration.separator(Component.text(" ")),
-                serverArrayList.stream().map(ServerListServerComponent::getComponent).toList()
+                serverArrayList.stream()
+                        .sorted()
+                        .map(ServerListServerComponent::getComponent)
+                        .toList()
         );
     }
 
     @Subscribe
     public void onServerConnectedEvent(ServerConnectedEvent event) {
+        // get server info
+        ServerInfo currentServerInfo = getServerInfo(event.getServer().getServerInfo().getName());
+
         Component message = Component.text("-".repeat(40) + "\n")
                 .append(Component.text("§e§l" + event.getPlayer().getUsername()))
                 .append(Component.text("§r, 欢迎回到 §bBSR 服务器§r！\n"))
-                .append(Component.text(getOpenDays(event.getServer())))
-                .append(Component.text("[§a一言§r] " + sentences.getRandomSentence() + "\n\n"))
-                .append(getServerList(event.getServer()))
+                .append(Component.text(getOpenDays(currentServerInfo)))
+                .append(Component.text("[§a一言§r] " + quotationsManager.getRandomQuotation() + "\n\n"))
+                .append(getServerListComponent(currentServerInfo))
                 .append(Component.text("\n"))
                 .append(Component.text("-".repeat(40)));
 

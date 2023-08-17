@@ -1,8 +1,3 @@
-[database]
-url = 'jdbc:postgresql://localhost:5432/postgres'
-user = 'postgres'
-password = ''
-table = 'postgres'
-
-[sentences]
-url = 'http://minio:9000/frontend?prefix=pages/gifs/'
+[backend]
+baseurl = "https://www.bsrserver.org.cn:8443/api"
+securedClientKey = "key"

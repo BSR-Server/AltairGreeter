@@ -2,8 +2,8 @@ package org.bsrserver.config;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Files;
 import java.util.Objects;
 
 import com.moandjiezana.toml.Toml;
@@ -30,31 +30,18 @@ public class Config {
         if (!configFile.exists()) {
             try {
                 Files.copy(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("config.toml")), configFile.toPath());
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignored) {
             }
         }
 
         configToml = new Toml().read(configFile);
     }
 
-    public String getDatabaseUrl() {
-        return configToml.getString("database.url");
+    public String getBackendBaseUrl() {
+        return configToml.getString("backend.baseurl");
     }
 
-    public String getDatabaseUser() {
-        return configToml.getString("database.user");
-    }
-
-    public String getDatabasePassword() {
-        return configToml.getString("database.password");
-    }
-
-    public String getDatabaseTable() {
-        return configToml.getString("database.table");
-    }
-
-    public String getSentencesUrl() {
-        return configToml.getString("sentences.url");
+    public String getBackendSecuredClientKey() {
+        return configToml.getString("backend.securedClientKey");
     }
 }
